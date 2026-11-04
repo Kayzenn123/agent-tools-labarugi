@@ -1,0 +1,69 @@
+---
+// LabaRugi design tokens — label kemasan jadul, kertas mauve + tinta ungu + stempel hijau.
+// Font families come from Astro Fonts API (astro.config.ts): --font-display, --font-body, --font-accent.
+// HANYA 3 ukuran font di seluruh situs: --f-s (16px), --f-m (48px), --f-xl (raksasa, clamp).
+---
+
+<style is:inline>
+  :root {
+    /* Palet: mid / monochrome hue 312 + pop hijau 165. Nilai final setelah cek kontras AA (script /tmp/contrast*.mjs). */
+    --bg: oklch(0.71 0.109 312);
+    --surface: oklch(0.62 0.11 312);
+    --surface-deep: oklch(0.32 0.1 312); /* dunia keluar: teks kertas di atasnya 4.93:1 */
+    --text: oklch(0.16 0.03 312); /* 7.26:1 di atas bg */
+    --lr-muted: oklch(0.32 0.04 312); /* 4.79:1 di atas bg */
+    --paper: oklch(0.71 0.109 312); /* teks di atas surface-deep */
+    --paper-muted: oklch(0.85 0.05 312); /* 8.25:1 di atas surface-deep */
+    --lr-accent: oklch(0.55 0.2 312);
+    --accent-2: oklch(0.68 0.22 312);
+    --pop: oklch(0.38 0.17 165); /* hijau stempel LABA: 3.11:1 di atas bg (teks raksasa, syarat 3:1) */
+    --rugi: oklch(0.35 0.16 312); /* ungu pekat stempel RUGI: 4.57:1 di atas bg */
+    --paper-line: oklch(0.16 0.03 312 / 0.55);
+
+    /* Tiga ukuran font. TIDAK ADA ukuran lain. */
+    --f-s: 1rem; /* 16px — semua teks fungsional */
+    --f-m: 3rem; /* 48px — sub-judul, angka sedang */
+    --f-xl: clamp(6rem, 22vw, 11.25rem); /* 96–180px — raksasa */
+
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* Map token template agar komponen bawaan yang tersisa tetap selaras */
+    --aw-font-sans: var(--font-body);
+    --aw-font-serif: var(--font-display);
+    --aw-font-heading: var(--font-display);
+    --aw-color-text-heading: oklch(0.16 0.03 312);
+    --aw-color-text-default: oklch(0.16 0.03 312);
+    --aw-color-text-muted: oklch(0.32 0.04 312);
+    --aw-color-bg-page: oklch(0.71 0.109 312);
+
+    ::selection {
+      background: oklch(0.45 0.17 165);
+      color: oklch(0.95 0.02 165);
+    }
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-body);
+    font-size: var(--f-s);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--pop);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+</style>

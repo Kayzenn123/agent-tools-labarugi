@@ -1,0 +1,307 @@
+---
+import Layout from '~/layouts/Layout.astro';
+import { Icon } from 'astro-icon/components';
+import '~/assets/styles/labarugi.css';
+
+const metadata = {
+  title: 'LabaRugi — Lembar Timbang Untung-Rugi Warung',
+  description:
+    'Catat pemasukan & pengeluaran warung, timbang laba-ruginya tiap hari. 100% offline di browser, tanpa akun, tanpa biaya.',
+  ignoreTitleTemplate: true,
+};
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const jsUrl = base + '/js/labarugi.js';
+---
+
+<Layout metadata={metadata}>
+  <div class="lr">
+    <a class="skip-link" href="#meja">Lompat ke meja catat</a>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="spotlight" id="spotlight" aria-hidden="true"></div>
+
+    <header class="label-head">
+      <div class="px-layer" aria-hidden="true" data-speed="0.06">
+        <div class="px-ornament" style="top:12%;left:6%;width:120px;height:120px;border-radius:50%;"></div>
+      </div>
+      <div class="px-layer" aria-hidden="true" data-speed="0.12">
+        <div class="px-ornament" style="top:20%;right:8%;width:80px;height:80px;transform:rotate(12deg);"></div>
+      </div>
+      <div class="brand-row">
+        <svg viewBox="0 0 128 128" aria-hidden="true">
+          <rect x="4" y="4" width="120" height="120" rx="18" fill="none" stroke="currentColor" stroke-width="6"></rect>
+          <line x1="64" y1="26" x2="64" y2="96" stroke="currentColor" stroke-width="6" stroke-linecap="round"></line>
+          <line x1="30" y1="40" x2="98" y2="40" stroke="currentColor" stroke-width="6" stroke-linecap="round"></line>
+          <line x1="30" y1="40" x2="22" y2="62" stroke="currentColor" stroke-width="4"></line>
+          <line x1="30" y1="40" x2="38" y2="62" stroke="currentColor" stroke-width="4"></line>
+          <path d="M16 62 h28 a14 10 0 0 1 -28 0" fill="none" stroke="currentColor" stroke-width="4"></path>
+          <line x1="98" y1="40" x2="90" y2="62" stroke="currentColor" stroke-width="4"></line>
+          <line x1="98" y1="40" x2="106" y2="62" stroke="currentColor" stroke-width="4"></line>
+          <path d="M84 62 h28 a14 10 0 0 1 -28 0" fill="none" stroke="currentColor" stroke-width="4"></path>
+          <line x1="44" y1="100" x2="84" y2="100" stroke="currentColor" stroke-width="6" stroke-linecap="round"></line>
+        </svg>
+        <h1 class="brand-name">LABARUGI</h1>
+      </div>
+      <p class="tagline">lembar timbang untung-rugi warung — dicatat jujur oleh Pak Catat</p>
+      <div class="head-meta">
+        <span id="headDate">—</span>
+        <button class="motion-toggle" id="motionToggle" aria-pressed="true">
+          <Icon name="ri:play-line" aria-hidden="true" />
+          <span>Gerak: <strong id="motionState">nyala</strong></span>
+        </button>
+      </div>
+      <div class="px-layer" aria-hidden="true" data-speed="0.18">
+        <div class="px-ornament" style="bottom:8%;left:12%;width:60px;height:60px;"></div>
+      </div>
+      <div class="px-layer" aria-hidden="true" data-speed="0.24">
+        <div class="px-ornament" style="top:40%;right:4%;width:44px;height:44px;border-radius:50%;"></div>
+      </div>
+      <div class="px-layer" aria-hidden="true" data-speed="0.3">
+        <div class="px-ornament" style="bottom:16%;right:16%;width:90px;height:26px;transform:rotate(-8deg);"></div>
+      </div>
+    </header>
+
+    <main id="meja">
+      <!-- ============ DUA DUNIA ============ -->
+      <section class="worlds" id="dunia" aria-label="Dua dunia: pemasukan dan pengeluaran">
+        <div class="world world-masuk" data-world="masuk">
+          <div class="fill" id="fillMasuk" aria-hidden="true"></div>
+          <p class="world-kicker">dunia pertama</p>
+          <h2 class="world-title">MASUK</h2>
+          <p class="world-total" id="totalMasuk" aria-live="polite">Rp0</p>
+          <p class="world-sub" id="countMasuk">belum ada catatan</p>
+          <form class="catat-form" id="formMasuk" novalidate>
+            <label>
+              tanggal
+              <input type="date" id="fMasukTgl" required />
+            </label>
+            <label>
+              keterangan
+              <input type="text" id="fMasukKet" placeholder="mis. jualan hari ini" maxlength="80" autocomplete="off" />
+            </label>
+            <label>
+              nominal (Rp)
+              <input type="number" id="fMasukNom" placeholder="mis. 250000" min="1" max="999999999" inputmode="numeric" />
+            </label>
+            <p class="field-error" id="errMasuk" role="alert"></p>
+            <button class="lr-btn" type="submit">
+              <Icon name="ri:add-line" aria-hidden="true" style="vertical-align:-4px" /> Catat masuk
+            </button>
+          </form>
+          <ul class="recent-list" id="recentMasuk" aria-label="Pemasukan terakhir"></ul>
+        </div>
+
+        <div
+          class="divider"
+          id="divider"
+          role="separator"
+          aria-orientation="vertical"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="50"
+          aria-label="Pembatas dua dunia. Geser untuk mengubah proporsi, atau pakai panah kiri kanan."
+          tabindex="0"
+        >
+          <span class="divider-handle" aria-hidden="true">
+            <Icon name="ri:expand-left-right-line" />
+          </span>
+          <span class="stamp-slot" id="stampSlot">
+            <span class="stamp laba" id="stamp">LABA</span>
+          </span>
+        </div>
+
+        <div class="world world-keluar" data-world="keluar">
+          <div class="fill" id="fillKeluar" aria-hidden="true"></div>
+          <p class="world-kicker">dunia kedua</p>
+          <h2 class="world-title">KELUAR</h2>
+          <p class="world-total" id="totalKeluar" aria-live="polite">Rp0</p>
+          <p class="world-sub" id="countKeluar">belum ada catatan</p>
+          <form class="catat-form" id="formKeluar" novalidate>
+            <label>
+              tanggal
+              <input type="date" id="fKeluarTgl" required />
+            </label>
+            <label>
+              kategori
+              <select id="fKeluarKat">
+                <option value="belanja bahan">belanja bahan</option>
+                <option value="sewa">sewa</option>
+                <option value="listrik & air">listrik &amp; air</option>
+                <option value="gaji">gaji</option>
+                <option value="transportasi">transportasi</option>
+                <option value="lain-lain">lain-lain</option>
+              </select>
+            </label>
+            <label>
+              keterangan
+              <input type="text" id="fKeluarKet" placeholder="mis. belanja ke pasar" maxlength="80" autocomplete="off" />
+            </label>
+            <label>
+              nominal (Rp)
+              <input type="number" id="fKeluarNom" placeholder="mis. 150000" min="1" max="999999999" inputmode="numeric" />
+            </label>
+            <p class="field-error" id="errKeluar" role="alert"></p>
+            <button class="lr-btn" type="submit">
+              <Icon name="ri:add-line" aria-hidden="true" style="vertical-align:-4px" /> Catat keluar
+            </button>
+          </form>
+          <ul class="recent-list" id="recentKeluar" aria-label="Pengeluaran terakhir"></ul>
+        </div>
+      </section>
+
+      <!-- ============ VONIS ============ -->
+      <section class="verdict" aria-label="Hasil timbangan">
+        <div class="marquee-wrap" id="marqueeWrap">
+          <svg viewBox="0 0 200 200" aria-hidden="true">
+            <defs>
+              <path id="circA" d="M100,100 m-80,0 a80,80 0 1,1 160,0 a80,80 0 1,1 -160,0"></path>
+              <path id="circB" d="M100,100 m-58,0 a58,58 0 1,1 116,0 a58,58 0 1,1 -116,0"></path>
+            </defs>
+            <g class="marquee-spin">
+              <text><textPath href="#circA">LAPORAN LABA RUGI • JUJUR ITU UNTUNG • LAPORAN LABA RUGI • JUJUR ITU UNTUNG •</textPath></text>
+            </g>
+            <g class="marquee-spin rev">
+              <text><textPath href="#circB">TIMBANG TIAP HARI • JANGAN NGARANG • TIMBANG TIAP HARI • JANGAN NGARANG •</textPath></text>
+            </g>
+          </svg>
+          <div class="marquee-ctl">
+            <button id="marqueePause" aria-pressed="false" aria-label="Jeda tulisan berjalan">jeda</button>
+          </div>
+        </div>
+        <p class="verdict-label">sisa di laci = masuk − keluar · periode terpilih</p>
+        <p class="verdict-number" id="verdictNumber" aria-live="polite">Rp0</p>
+        <p class="verdict-state" id="verdictState">—</p>
+        <p class="margin-line" id="marginLine"></p>
+        <div class="period-filters" role="group" aria-label="Pilih periode">
+          <button data-period="today" aria-pressed="false">hari ini</button>
+          <button data-period="7d" aria-pressed="false">7 hari</button>
+          <button data-period="30d" aria-pressed="true">30 hari</button>
+          <button data-period="month" aria-pressed="false">bulan ini</button>
+          <button data-period="all" aria-pressed="false">semua</button>
+        </div>
+        <button class="lr-btn" id="timbangBtn">
+          <Icon name="ri:scales-line" aria-hidden="true" style="vertical-align:-4px" /> Timbang!
+        </button>
+      </section>
+
+      <div class="perforasi" aria-hidden="true"></div>
+
+      <!-- ============ JEJAK 30 HARI ============ -->
+      <section class="section reveal" aria-label="Grafik 30 hari">
+        <h2 class="outline-title" data-fill>jejak 30 hari</h2>
+        <div class="trend-box">
+          <svg id="trendChart" viewBox="0 0 720 260" role="img" aria-label="Grafik garis pemasukan dan pengeluaran 30 hari terakhir"></svg>
+          <div class="trend-tip" id="trendTip" aria-hidden="true"></div>
+        </div>
+        <div class="trend-legend">
+          <span><span class="swatch" style="background:var(--pop)"></span>pemasukan</span>
+          <span><span class="swatch" style="background:var(--rugi)"></span>pengeluaran</span>
+          <span>arahkan kursor / ketuk titik untuk detail</span>
+        </div>
+      </section>
+
+      <!-- ============ REKAP BULANAN ============ -->
+      <section class="section reveal" aria-label="Rekap bulanan">
+        <h2 class="outline-title" data-fill>rekap bulanan</h2>
+        <ul class="month-list" id="monthList"></ul>
+      </section>
+
+      <!-- ============ BUKU CATATAN ============ -->
+      <section class="section reveal" aria-label="Buku catatan">
+        <h2 class="outline-title" data-fill>buku catatan</h2>
+        <div class="confirm-bar" id="confirmBar" role="alert">
+          <span>Yakin hapus <strong>semua</strong> catatan? Tidak bisa dibatalkan.</span>
+          <button class="lr-btn lr-btn-ghost" id="confirmYa">ya, hapus</button>
+          <button class="lr-btn lr-btn-ghost" id="confirmBatal">batal</button>
+        </div>
+        <div class="history-tools">
+          <input type="search" id="txSearch" placeholder="cari keterangan…" aria-label="Cari catatan" />
+          <button class="lr-btn lr-btn-ghost" id="btnContoh">
+            <Icon name="ri:sparkling-line" aria-hidden="true" style="vertical-align:-4px" /> isi contoh
+          </button>
+          <button class="lr-btn lr-btn-ghost" id="btnHapusSemua">
+            <Icon name="ri:delete-bin-line" aria-hidden="true" style="vertical-align:-4px" /> hapus semua
+          </button>
+        </div>
+        <p class="world-sub" id="txCount" style="color:var(--muted)"></p>
+        <ul class="tx-list" id="txList"></ul>
+        <div class="empty-note" id="txEmpty" hidden>
+          Belum ada catatan. Tulis pemasukan pertamamu di DUNIA MASUK — biar lacinya nggak misterius.
+        </div>
+      </section>
+
+      <!-- ============ BAWA PULANG ============ -->
+      <section class="section reveal" aria-label="Ekspor dan bagikan">
+        <h2 class="outline-title" data-fill>bawa pulang</h2>
+        <div class="share-grid">
+          <button class="lr-btn" id="btnWA">
+            <Icon name="ri:chat-3-line" aria-hidden="true" style="vertical-align:-4px" /> salin ringkasan WA
+          </button>
+          <button class="lr-btn lr-btn-ghost" id="btnTautan">
+            <Icon name="ri:links-line" aria-hidden="true" style="vertical-align:-4px" /> salin tautan
+          </button>
+          <button class="lr-btn lr-btn-ghost" id="btnCSV">
+            <Icon name="ri:download-line" aria-hidden="true" style="vertical-align:-4px" /> unduh CSV
+          </button>
+          <button class="lr-btn lr-btn-ghost" id="btnJSON">
+            <Icon name="ri:download-line" aria-hidden="true" style="vertical-align:-4px" /> unduh JSON
+          </button>
+          <button class="lr-btn lr-btn-ghost" id="btnImpor">
+            <Icon name="ri:upload-line" aria-hidden="true" style="vertical-align:-4px" /> impor JSON
+          </button>
+          <button class="lr-btn lr-btn-ghost" id="btnCetak">
+            <Icon name="ri:printer-line" aria-hidden="true" style="vertical-align:-4px" /> cetak laporan
+          </button>
+        </div>
+        <input type="file" id="importFile" accept="application/json,.json" aria-label="Pilih file JSON untuk diimpor" aria-hidden="true" tabindex="-1" />
+      </section>
+
+      <!-- ============ WEJANGAN ============ -->
+      <section class="section reveal" aria-label="Wejangan Pak Catat">
+        <h2 class="outline-title" data-fill>wejangan pak catat</h2>
+        <div class="tips-grid">
+          <article class="tip-card">
+            <div class="tip-no" aria-hidden="true">1</div>
+            <p>Catat tiap malam sebelum tutup. Struk yang menumpuk di laci itu bukan arsip — itu misteri.</p>
+          </article>
+          <article class="tip-card">
+            <div class="tip-no" aria-hidden="true">2</div>
+            <p>Pisahkan uang warung dan uang jajan. Dompet yang campur menghasilkan laporan yang ngarang.</p>
+          </article>
+          <article class="tip-card">
+            <div class="tip-no" aria-hidden="true">3</div>
+            <p>Cek margin tiap minggu. Di bawah 20% tiga minggu berturut-turut berarti ada yang bocor — biasanya di belanja bahan.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="label-foot">
+      <div class="label-frame" style="display:inline-block;padding:1.5rem 2.5rem;">
+        <span class="label-corner tl" aria-hidden="true"></span>
+        <span class="label-corner tr" aria-hidden="true"></span>
+        <span class="label-corner bl" aria-hidden="true"></span>
+        <span class="label-corner br" aria-hidden="true"></span>
+        <p class="foot-brand">LABARUGI</p>
+        <p>100% offline — datamu tidak pernah meninggalkan peramban ini.</p>
+        <p class="easter-hint">kata Pak Catat: ketuk stempelnya lima kali…</p>
+      </div>
+    </footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "LabaRugi",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "IDR" },
+      "inLanguage": "id",
+      "description": "Lembar timbang untung-rugi warung: catat pemasukan & pengeluaran, lihat laba bersih dan margin. 100% offline."
+    }
+  </script>
+  <script src={jsUrl} defer></script>
+</Layout>
